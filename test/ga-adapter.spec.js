@@ -105,6 +105,17 @@ juttle_test_utils.withAdapterAPI(function() {
             });
         });
 
+        it('can query a single metric into a * field', () => {
+            return checkJuttle({
+                program: `read ga -viewId ${viewId} -last :week: | reduce *"foo"=sum(users)`
+            })
+            .then((results) => {
+                expect(results.errors).deep.equal([]);
+                expect(results.warnings).deep.equal([]);
+                expect(results.sinks.table[0].foo).greaterThan(0);
+            });
+        });
+
         it('can query a single metric by a dimension', () => {
             return checkJuttle({
                 program: `read ga -viewId ${viewId} -last :week: | reduce sum(users) by userType`
@@ -164,12 +175,12 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a metric with no data', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} -last :week: | reduce sum(avgTimeOnSite)`
+                program: `read ga -viewId ${viewId} | reduce sum(transactions)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
                 expect(results.warnings).deep.equal([]);
-                expect(results.sinks.table[0].sum).greaterThan(1.0);
+                expect(results.sinks.table[0].sum).to.equal(0);
             });
         });
     });
@@ -219,6 +230,13 @@ juttle_test_utils.withAdapterAPI(function() {
             return badJuttle(
                 'read ga',
                 'read ga does not support read without reduce'
+            );
+        });
+
+        it('fails with a filter ', () => {
+            return badJuttle(
+                'read ga foo=123',
+                'filtering is not supported by read ga.'
             );
         });
 
