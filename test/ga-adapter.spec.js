@@ -39,6 +39,7 @@ juttle_test_utils.withAdapterAPI(function() {
             ga_config = JSON.parse(process.env.JUTTLE_GA_CONFIG);
             console.log('XXX got config', Object.keys(ga_config.service_account));
             console.log('YYY private_key length', ga_config.service_account.private_key ? ga_config.service_account.private_key.length : 0);
+            console.log('YYY private_key lines', ga_config.service_account.split('\n').length);
         }
 
         ga_config.path = path.resolve(__dirname, '..');
