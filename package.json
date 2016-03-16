@@ -1,0 +1,36 @@
+{
+  "name": "juttle-ga-adapter",
+  "version": "0.0.1",
+  "description": "Juttle adapter for the Google Analytics API",
+  "keywords": [
+    "juttle",
+    "adapter"
+  ],
+  "homepage": "https://github.com/juttle/juttle-ga-adapter",
+  "bugs": "https://github.com/juttle/juttle-ga-adapter/issues",
+  "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "repository": "juttle/juttle-ga-adapter",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "dependencies": {
+    "bluebird": "^3.3.4",
+    "googleapis": "^2.1.7",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^1.1.1",
+    "gulp-istanbul": "^0.10.3",
+    "gulp-mocha": "^2.2.0",
+    "istanbul": "^0.4.2",
+    "mocha": "^2.3.4"
+  },
+  "juttleAdapterAPI": "^0.5.0",
+  "engines": {
+    "node": ">=4.2.0",
+    "npm": ">=2.14.7"
+  }
+}
