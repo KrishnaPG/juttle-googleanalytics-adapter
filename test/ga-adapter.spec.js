@@ -37,6 +37,8 @@ juttle_test_utils.withAdapterAPI(function() {
                 throw new Error('To run this test, you must provide the adapter config via the environment as JUTTLE_GA_CONFIG.');
             }
             ga_config = JSON.parse(process.env.JUTTLE_GA_CONFIG);
+            console.log('XXX got config', Object.keys(ga_config));
+            console.log('YYY private_key length', ga_config.private_key ? ga_config.private_key.length : 0);
         }
 
         ga_config.path = path.resolve(__dirname, '..');
