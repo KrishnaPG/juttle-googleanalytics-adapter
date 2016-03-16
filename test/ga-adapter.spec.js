@@ -193,6 +193,17 @@ juttle_test_utils.withAdapterAPI(function() {
             });
         }
 
+        it(`can reduce -every interval across multiple properties`, () => {
+            return checkJuttle({
+                program: `read ga -last :week: | reduce -every :day: sum(users) by webProperty`
+            })
+            .then((results) => {
+                expect(results.errors).deep.equal([]);
+                expect(results.warnings).deep.equal([]);
+                expect(results.sinks.table.length).greaterThan(0);
+            });
+        });
+
         it('fails with an invalid -every interval', () => {
             return badJuttle(
                 'read ga | reduce -every :10 days: sum(users)',
