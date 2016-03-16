@@ -8,6 +8,6 @@ before_script:
     - npm install juttle
 
 script:
-    - echo "testing 2"
+    - echo "testing 3"
     - gulp lint
     - gulp test-coverage
