@@ -305,6 +305,20 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('fails with reduce and no metric', () => {
             return badJuttle(
+                'read ga | reduce',
+                'read ga does not support reduce without a metric'
+            );
+        });
+
+        it('fails with reduce -every and no metric', () => {
+            return badJuttle(
+                'read ga | reduce -every :1h:',
+                'read ga does not support reduce without a metric'
+            );
+        });
+
+        it('fails with reduce by userType and no metric', () => {
+            return badJuttle(
                 'read ga | reduce by userType',
                 'read ga does not support reduce by userType without a metric'
             );
