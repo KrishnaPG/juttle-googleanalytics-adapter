@@ -77,17 +77,25 @@ Alternatively you could install the juttle-engine which includes the adapter:
 $ npm install juttle-engine
 ```
 
+## Ecosystem
+
+The juttle-ga-adapter fits into the overall Juttle Ecosystem as one of the adapters in the [below diagram](https://github.com/juttle/juttle/blob/master/docs/juttle_ecosystem.md):
+
+[![Juttle Ecosystem](https://github.com/juttle/juttle/raw/master/docs/images/JuttleEcosystemDiagram.png)](https://github.com/juttle/juttle/blob/master/docs/juttle_ecosystem.md)
+
 ## Authorization / Configuration
 
-First you need to enable the API and create a service account for authentication.
+Before using the adapter, you need to create authorization credentials within the Google API, set up your Google Analytics account to allow access, and configure the Juttle runtime with the newly created credentials.
 
-The process is enumerated in step 1 of the [Hello Analytics API Guide](https://developers.google.com/analytics/devguides/reporting/core/v3/quickstart/service-java#summary_auth). You don't need to do steps 2-4 in that guide.
+The steps of the process are enumerated in step 1 of the [Hello Analytics API Guide](https://developers.google.com/analytics/devguides/reporting/core/v3/quickstart/service-java#summary_auth). You don't need to do steps 2-4 in that guide but you should follow the instructions in step 1 to:
 
-Once you've created the account and are ready to download the credentials, make sure you select the `JSON` key type and not the `P12` key type. This should result in a file downloaded to your computer.
+* Choose an existing Google API project or create a new project with access to the Analytics API
+* Create a "service account" within the project and download the account credentials. Make sure you select the `JSON` key type and not the `P12` key type.
+* Configure your Google Analytics account to allow "Read & Analyze" access by the email address created for the new service account.
 
 Next the adapter needs to be registered and configured so that it can be used from within Juttle.
 
-To do so, take the contents of the service account JSON file and add it to a new "ga" section in the adapters configuration of your `~/.juttle/config.json` file as follows:
+To do so, take the contents of the downloaded service account credentials file and add it to a new "ga" section in the adapters configuration of your `~/.juttle/config.json` file as follows:
 
 ```json
 {
@@ -115,7 +123,7 @@ To do so, take the contents of the service account JSON file and add it to a new
 
 ### Read options
 
-Since google analytics returns aggregate data, the only supported query pattern using Juttle uses a combination of [read](http://juttle.github.io/juttle/processors/read/) and [reduce](http://juttle.github.io/juttle/processors/reduce/), using the general form:
+The Google Analytics API exposes metrics for various event counts which can be aggregated across various dimensions. To access these counts in Juttle, you need to use a combination of [read](http://juttle.github.io/juttle/processors/read/) and [reduce](http://juttle.github.io/juttle/processors/reduce/), following the general form:
 
 `read ga [options] | reduce [-every interval] v1=sum(metric1) [,v2=sum(metric2),...] [by dimension1, dimension2, ...]`
 
@@ -133,25 +141,33 @@ The options `from`, `to`, and `last` control the time period for the query. The 
 
 The other options are used to control which property or view is queried.
 
+### Metrics and dimensions
+
+Google Analytics exposes various metrics and dimensions that can be used in the reduce operation. You can access the full list in the [Dimensions & Metrics Explorer](https://developers.google.com/analytics/devguides/reporting/core/dimsmets). Note that not all metrics and dimensions are compatible with each other. Also when accessing these names in juttle, omit the `ga:` prefix from the name of the metric or dimension in the list above.
+
+The only juttle reducer supported for the metrics is `sum` since the API only returns aggregate counts of events across the various dimensions. Also the `time` dimension keys should never be used in the `by` clause of `reduce`. Instead if you want to apply the operation over a time interval, you should pass that interval in the `-every` option to reduce.
+
+The adapter also supports several metadata dimensions to group the results by the property and/or view. Any of `webProperty`, `webPropertyId`, `view`, `viewId` can be used in the `by` clause to group by the given dimension.
+
 ### Properties and Views
 
 A given Google Analytics account can be used for multiple properties, each possibly containing multiple views, as described in the [hierarchy of accounts, users, properties, and views](https://support.google.com/analytics/answer/1009618?hl=en&ref_topic=3544906).
 
 By default, the adapter reads from the `"All Web Site Data"` view in each property the user has access to. This ensures that each site is included without potentially duplicating counts which might happen if it included all views by default.
 
-To restrict the query to a given web property, pass the `-webProperty` option with either the name or the ID of the given property.
+You can list the available views and properties by running:
 
-To restrict the query to a specific view, pass the `-viewId` option to the read. This will bypass the step where the adapter has to query the metadata to determine the list of accessible views, which is more efficient and responsive when accessing only a single view.
+```
+read ga | reduce by webProperty, webPropertyId, view, viewId
+```
+
+To restrict the query to a specific view, pass the `-viewId` option to the read. This will make queries more efficient since it bypasses the step where the adapter has to query the metadata to determine the list of accessible views, which is more efficient and responsive when accessing only a single view.
+
+To restrict the query to a given web property, pass the `-webProperty` option with either the name or the ID of the given property.
 
 To access data from multiple views (either for a single property or for multiple properties), include `by view` and/or `by viewId` in the grouping clause of the `reduce` statement.
 
-### Metrics and dimensions
 
-Google Analytics supports various metrics and dimensions that can be used in the reduce operation. You can access the full list in the [Dimensions & Metrics Explorer](https://developers.google.com/analytics/devguides/reporting/core/dimsmets). Not all metrics and dimensions are compatible with each other.
-
-The only juttle reducer supported is `sum` and the `time` dimension keys should not be used in the `by` clause of `reduce`. Instead if you want to apply the operation over a time interval, you should pass that interval in the `-every` option to reduce.
-
-The adapter also supports several metadata dimensions to group the results by the property and/or view. Any of `webProperty`, `webPropertyId`, `view`, `viewId` can be used in the `by` clause to group by the given dimension.
 
 ## Contributing
 
