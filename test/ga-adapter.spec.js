@@ -183,6 +183,18 @@ juttle_test_utils.withAdapterAPI(function() {
                 expect(results.sinks.table[0].sum).to.equal(0);
             });
         });
+
+        it('can page through multiple results', () => {
+            return checkJuttle({
+                program: `read ga -viewId ${viewId} -from :yesterday: -to :today: -fetchSize 10 | reduce -every :1m: sum(pageviews)`
+            })
+            .then((results) => {
+                expect(results.errors).deep.equal([]);
+                expect(results.warnings).deep.equal([]);
+                expect(results.sinks.table.length).greaterThan(100);
+                expect(results.graph.adapter.fetches).greaterThan(1);
+            });
+        });
     });
 
     describe('read ga reduce intervals', function() {
