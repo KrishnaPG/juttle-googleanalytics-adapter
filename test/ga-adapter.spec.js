@@ -29,8 +29,8 @@ juttle_test_utils.withAdapterAPI(function() {
         let ga_config;
 
         if (_.has(config, 'adapters') &&
-            _.has(config.adapters, 'ga')) {
-            ga_config = config.adapters.ga;
+            _.has(config.adapters, 'googleanalytics')) {
+            ga_config = config.adapters.googleanalytics;
         } else {
             if (! _.has(process.env, 'JUTTLE_GA_CONFIG') ||
                 process.env.JUTTLE_GA_CONFIG === '') {
@@ -42,12 +42,12 @@ juttle_test_utils.withAdapterAPI(function() {
         ga_config.path = path.resolve(__dirname, '..');
 
         juttle_test_utils.configureAdapter({
-            ga: ga_config
+            googleanalytics: ga_config
         });
 
         // Read all the properties and views once so we can use them later.
         return checkJuttle({
-            program: 'read ga | reduce by webProperty, webPropertyId, view, viewId'
+            program: 'read googleanalytics | reduce by webProperty, webPropertyId, view, viewId'
         })
         .then((results) => {
             expect(results.errors).deep.equal([]);
@@ -62,7 +62,7 @@ juttle_test_utils.withAdapterAPI(function() {
         return Promise.delay(1000);
     });
 
-    describe('read ga', function() {
+    describe('read googleanalytics', function() {
         this.timeout(30000);
 
         // These actually got fetched in the before() since they're needed for
@@ -74,7 +74,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric from one view', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} | reduce sum(users)`
+                program: `read googleanalytics -viewId ${viewId} | reduce sum(users)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -85,7 +85,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric from one property', () => {
             return checkJuttle({
-                program: `read ga -webProperty "${views[0].webProperty}" | reduce sum(users)`
+                program: `read googleanalytics -webProperty "${views[0].webProperty}" | reduce sum(users)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -96,7 +96,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric into a variable', () => {
             return checkJuttle({
-                program: `const x="foo"; read ga -viewId ${viewId} | reduce *x=sum(users)`
+                program: `const x="foo"; read googleanalytics -viewId ${viewId} | reduce *x=sum(users)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -107,7 +107,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric into a * field', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} | reduce *"foo"=sum(users)`
+                program: `read googleanalytics -viewId ${viewId} | reduce *"foo"=sum(users)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -118,7 +118,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric by a dimension', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} | reduce sum(users) by userType`
+                program: `read googleanalytics -viewId ${viewId} | reduce sum(users) by userType`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -131,7 +131,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric across views', () => {
             return checkJuttle({
-                program: 'read ga | reduce sum(users) by webProperty, view'
+                program: 'read googleanalytics | reduce sum(users) by webProperty, view'
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -142,7 +142,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric across properties', () => {
             return checkJuttle({
-                program: 'read ga | reduce sum(users) by webProperty'
+                program: 'read googleanalytics | reduce sum(users) by webProperty'
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -153,7 +153,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can reduce a second time', () => {
             return checkJuttle({
-                program: 'read ga | reduce sum(users) by webProperty, view | reduce count()'
+                program: 'read googleanalytics | reduce sum(users) by webProperty, view | reduce count()'
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -164,7 +164,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a time metric', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} | reduce sum(avgTimeOnSite)`
+                program: `read googleanalytics -viewId ${viewId} | reduce sum(avgTimeOnSite)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -175,7 +175,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a metric with no data', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} -from :today: -to :now: | reduce sum(adxCoverage)`
+                program: `read googleanalytics -viewId ${viewId} -from :today: -to :now: | reduce sum(adxCoverage)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -186,7 +186,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can page through multiple results', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} -from :yesterday: -to :today: -fetchSize 10 | reduce -every :1m: sum(pageviews)`
+                program: `read googleanalytics -viewId ${viewId} -from :yesterday: -to :today: -fetchSize 10 | reduce -every :1m: sum(pageviews)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -197,7 +197,7 @@ juttle_test_utils.withAdapterAPI(function() {
         });
     });
 
-    describe('read ga reduce intervals', function() {
+    describe('read googleanalytics reduce intervals', function() {
         this.timeout(30000);
 
         let intervals = 'mhdwMy';
@@ -206,7 +206,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
             it(`can reduce -every ${interval}`, () => {
                 return checkJuttle({
-                    program: `read ga -viewId ${viewId} | reduce -every ${interval} sum(users)`
+                    program: `read googleanalytics -viewId ${viewId} | reduce -every ${interval} sum(users)`
                 })
                 .then((results) => {
                     expect(results.errors).deep.equal([]);
@@ -218,7 +218,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it(`can reduce -every interval across multiple properties`, () => {
             return checkJuttle({
-                program: `read ga | reduce -every :day: sum(users) by webProperty`
+                program: `read googleanalytics | reduce -every :day: sum(users) by webProperty`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -229,130 +229,130 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('fails with an invalid -every interval', () => {
             return badJuttle(
-                'read ga | reduce -every :10 days: sum(users)',
-                'read ga does not support reduce with interval other than 1 minute, hour, day, week, month or year'
+                'read googleanalytics | reduce -every :10 days: sum(users)',
+                'read googleanalytics does not support reduce with interval other than 1 minute, hour, day, week, month or year'
             );
         });
     });
 
-    describe('read ga errors', function() {
+    describe('read googleanalytics errors', function() {
         this.timeout(30000);
 
         it('fails without reduce', () => {
             return badJuttle(
-                'read ga',
-                'read ga does not support read without reduce'
+                'read googleanalytics',
+                'read googleanalytics does not support read without reduce'
             );
         });
 
         it('fails with a filter ', () => {
             return badJuttle(
-                'read ga foo=123',
-                'filtering is not supported by read ga.'
+                'read googleanalytics foo=123',
+                'filtering is not supported by read googleanalytics.'
             );
         });
 
         it('fails with reduce -on', () => {
             return badJuttle(
-                'read ga | reduce -every :1d: -on :now: sum(users)',
-                'read ga does not support reduce with options every,on'
+                'read googleanalytics | reduce -every :1d: -on :now: sum(users)',
+                'read googleanalytics does not support reduce with options every,on'
             );
         });
 
         it('fails with reduce into time', () => {
             return badJuttle(
-                'read ga | reduce time=sum(users)',
-                'read ga does not support reduce on time'
+                'read googleanalytics | reduce time=sum(users)',
+                'read googleanalytics does not support reduce on time'
             );
         });
 
         it('fails with reduce by time', () => {
             return badJuttle(
-                'read ga | reduce sum(users) by time',
-                'read ga does not support reduce group by time'
+                'read googleanalytics | reduce sum(users) by time',
+                'read googleanalytics does not support reduce group by time'
             );
         });
 
         it('fails with reduce by date', () => {
             return badJuttle(
-                'read ga | reduce sum(users) by date',
-                'read ga does not support reduce group by date'
+                'read googleanalytics | reduce sum(users) by date',
+                'read googleanalytics does not support reduce group by date'
             );
         });
 
         it('fails with reduce sum(1))', () => {
             return badJuttle(
-                'read ga | reduce sum(1)',
-                'read ga does not support reduce other than sum(field)'
+                'read googleanalytics | reduce sum(1)',
+                'read googleanalytics does not support reduce other than sum(field)'
             );
         });
 
         it('fails with reduce count()', () => {
             return badJuttle(
-                'read ga | reduce count()',
-                'read ga does not support reduce other than sum(field)'
+                'read googleanalytics | reduce count()',
+                'read googleanalytics does not support reduce other than sum(field)'
             );
         });
 
         it('fails with reduce percentile(users, 10)', () => {
             return badJuttle(
-                'read ga | reduce percentile(users, 10)',
-                'read ga does not support reduce other than sum(field)'
+                'read googleanalytics | reduce percentile(users, 10)',
+                'read googleanalytics does not support reduce other than sum(field)'
             );
         });
 
         it('fails with reduce avg(1)', () => {
             return badJuttle(
-                'read ga | reduce avg(1)',
-                'read ga does not support reduce other than sum(field)'
+                'read googleanalytics | reduce avg(1)',
+                'read googleanalytics does not support reduce other than sum(field)'
             );
         });
 
         it('fails with reduce x="y"', () => {
             return badJuttle(
-                'read ga | reduce sum(users), x="y"',
-                'read ga does not support reduce other than sum(field)'
+                'read googleanalytics | reduce sum(users), x="y"',
+                'read googleanalytics does not support reduce other than sum(field)'
             );
         });
 
         it('fails with reduce and no metric', () => {
             return badJuttle(
-                'read ga | reduce',
-                'read ga does not support reduce without a metric'
+                'read googleanalytics | reduce',
+                'read googleanalytics does not support reduce without a metric'
             );
         });
 
         it('fails with reduce -every and no metric', () => {
             return badJuttle(
-                'read ga | reduce -every :1h:',
-                'read ga does not support reduce without a metric'
+                'read googleanalytics | reduce -every :1h:',
+                'read googleanalytics does not support reduce without a metric'
             );
         });
 
         it('fails with reduce by userType and no metric', () => {
             return badJuttle(
-                'read ga | reduce by userType',
-                'read ga does not support reduce by userType without a metric'
+                'read googleanalytics | reduce by userType',
+                'read googleanalytics does not support reduce by userType without a metric'
             );
         });
 
         it('fails with -viewId and reduce by viewId', () => {
             return badJuttle(
-                `read ga -viewId ${viewId}| reduce by viewId`,
-                'read ga does not support -viewId with reduce group by viewId'
+                `read googleanalytics -viewId ${viewId}| reduce by viewId`,
+                'read googleanalytics does not support -viewId with reduce group by viewId'
             );
         });
 
         it('fails with -from a time that is not a whole day', () => {
             return badJuttle(
-                `read ga -viewId ${viewId} -from :today: + :1h: | reduce sum(users)`,
+                `read googleanalytics -viewId ${viewId} -from :today: + :1h: | reduce sum(users)`,
                 'Unsupported value for -from option: must be aligned to a whole day'
             );
         });
 
         it('fails with -to a time that is not a whole day', () => {
             return badJuttle(
-                `read ga -viewId ${viewId} -to :today: + :1h: | reduce sum(users)`,
+                `read googleanalytics -viewId ${viewId} -to :today: + :1h: | reduce sum(users)`,
                 'Unsupported value for -to option: must be aligned to a whole day or :now:'
             );
         });

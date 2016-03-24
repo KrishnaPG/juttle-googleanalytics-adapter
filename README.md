@@ -1,6 +1,6 @@
 # Juttle Google Analytics Adapter
 
-[![Build Status](https://travis-ci.org/juttle/juttle-ga-adapter.svg?branch=master)](https://travis-ci.org/juttle/juttle-ga-adapter)
+[![Build Status](https://travis-ci.org/juttle/juttle-googleanalytics-adapter.svg?branch=master)](https://travis-ci.org/juttle/juttle-googleanalytics-adapter)
 
 This is an adapter that allows Juttle to read data from [Google Analytics](http://www.google.com/analytics/) using the [Core Reporting API](https://developers.google.com/analytics/devguides/reporting/core/v3/)
 
@@ -11,7 +11,7 @@ It can pull data from various web properties and views to get visibility into us
 ### Count pageviews and sessions for each web property over the past two weeks
 
 ```juttle
-read ga | reduce pageviews=sum(pageviews), sessions=sum(sessions) by webProperty
+read googleanalytics | reduce pageviews=sum(pageviews), sessions=sum(sessions) by webProperty
 ```
 
 ```
@@ -29,7 +29,7 @@ read ga | reduce pageviews=sum(pageviews), sessions=sum(sessions) by webProperty
 ### Plot a barchart of the 10 most popular non-blog pages across each property yesterday
 
 ```juttle
-read ga -from :yesterday:
+read googleanalytics -from :yesterday:
 | reduce pageviews=sum(pageviews) by pagePath, webProperty
 | filter pagePath !~ '*blog*'
 | put url='${webProperty}${pagePath}'
@@ -42,7 +42,7 @@ read ga -from :yesterday:
 ### Show the pages most viewed by new users by referral source over the past week
 
 ```juttle
-read ga -from :last week: -viewId 78763287
+read googleanalytics -from :last week: -viewId 78763287
 | reduce sum(pageviews) by userType, pagePath, source
 | filter source != '(direct)' AND userType='New Visitor'
 | sort sum -desc
@@ -52,13 +52,13 @@ read ga -from :last week: -viewId 78763287
 ### List all the web properties and views in the account
 
 ```juttle
-read ga | reduce by webProperty, webPropertyId, view, viewId
+read googleanalytics | reduce by webProperty, webPropertyId, view, viewId
 ```
 
 ### Print today's visitors for a given site by each view
 
 ```juttle
-read ga -from :today: -to :now: -webProperty 'www.jut.io'
+read googleanalytics -from :today: -to :now: -webProperty 'www.jut.io'
 | reduce users=sum(users) by view, viewId
 ```
 
@@ -68,7 +68,7 @@ Like Juttle itself, the adapter is installed as a npm package. Both Juttle and t
 
 ```bash
 $ npm install juttle
-$ npm install juttle-ga-adapter
+$ npm install juttle-googleanalytics-adapter
 ```
 
 Alternatively you could install the juttle-engine which includes the adapter:
@@ -79,7 +79,7 @@ $ npm install juttle-engine
 
 ## Ecosystem
 
-The juttle-ga-adapter fits into the overall Juttle Ecosystem as one of the adapters in the [below diagram](https://github.com/juttle/juttle/blob/master/docs/juttle_ecosystem.md):
+The juttle-googleanalytics-adapter fits into the overall Juttle Ecosystem as one of the adapters in the [below diagram](https://github.com/juttle/juttle/blob/master/docs/juttle_ecosystem.md):
 
 [![Juttle Ecosystem](https://github.com/juttle/juttle/raw/master/docs/images/JuttleEcosystemDiagram.png)](https://github.com/juttle/juttle/blob/master/docs/juttle_ecosystem.md)
 
@@ -95,12 +95,12 @@ The steps of the process are enumerated in step 1 of the [Hello Analytics API Gu
 
 Next the adapter needs to be registered and configured so that it can be used from within Juttle.
 
-To do so, take the contents of the downloaded service account credentials file and add it to a new "ga" section in the adapters configuration of your `~/.juttle/config.json` file as follows:
+To do so, take the contents of the downloaded service account credentials file and add it to a new "googleanalytics" section in the adapters configuration of your `~/.juttle/config.json` file as follows:
 
 ```json
 {
     "adapters": {
-        "ga": {
+        "googleanalytics": {
             "service_account": {
                 "type": "service_account",
                 "project_id": "<YOUR PROJECT ID>",
@@ -125,7 +125,7 @@ To do so, take the contents of the downloaded service account credentials file a
 
 The Google Analytics API exposes metrics for various event counts which can be aggregated across various dimensions. To access these counts in Juttle, you need to use a combination of [read](http://juttle.github.io/juttle/processors/read/) and [reduce](http://juttle.github.io/juttle/processors/reduce/), following the general form:
 
-`read ga [options] | reduce [-every interval] v1=sum(metric1) [,v2=sum(metric2),...] [by dimension1, dimension2, ...]`
+`read googleanalytics [options] | reduce [-every interval] v1=sum(metric1) [,v2=sum(metric2),...] [by dimension1, dimension2, ...]`
 
 The `options` can include the following:
 
@@ -157,7 +157,7 @@ By default, the adapter reads from the `"All Web Site Data"` view in each proper
 You can list the available views and properties by running:
 
 ```
-read ga | reduce by webProperty, webPropertyId, view, viewId
+read googleanalytics | reduce by webProperty, webPropertyId, view, viewId
 ```
 
 To restrict the query to a specific view, pass the `-viewId` option to the read. This will make queries more efficient since it bypasses the step where the adapter has to query the metadata to determine the list of accessible views, which is more efficient and responsive when accessing only a single view.
