@@ -1,6 +1,6 @@
 {
   "name": "juttle-googleanalytics-adapter",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Juttle adapter for the Google Analytics API",
   "keywords": [
     "juttle",
