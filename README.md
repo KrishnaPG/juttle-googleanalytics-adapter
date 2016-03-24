@@ -8,10 +8,10 @@ It can pull data from various web properties and views to get visibility into us
 
 ## Examples
 
-### Count pageviews and sessions for each web property over the past week
+### Count pageviews and sessions for each web property over the past two weeks
 
 ```juttle
-read ga -last :day: | reduce pageviews=sum(pageviews), sessions=sum(sessions) by webProperty
+read ga | reduce pageviews=sum(pageviews), sessions=sum(sessions) by webProperty
 ```
 
 ```
@@ -26,23 +26,23 @@ read ga -last :day: | reduce pageviews=sum(pageviews), sessions=sum(sessions) by
 └──────────────┴────────────┴─────────────────────────────────────────┘
 ```
 
-### Plot a barchart of the 10 most popular non-blog pages across each property
+### Plot a barchart of the 10 most popular non-blog pages across each property yesterday
 
 ```juttle
-read ga -last :1 week:
+read ga -from :yesterday:
 | reduce pageviews=sum(pageviews) by pagePath, webProperty
 | filter pagePath !~ '*blog*'
 | put url='${webProperty}${pagePath}'
 | keep time, pageviews, url
 | sort pageviews -desc
 | head 10
-| view barchart;
+| view barchart
 ```
 
 ### Show the pages most viewed by new users by referral source over the past week
 
 ```juttle
-read ga -last :w: -viewId 78763287
+read ga -from :last week: -viewId 78763287
 | reduce sum(pageviews) by userType, pagePath, source
 | filter source != '(direct)' AND userType='New Visitor'
 | sort sum -desc
@@ -55,10 +55,10 @@ read ga -last :w: -viewId 78763287
 read ga | reduce by webProperty, webPropertyId, view, viewId
 ```
 
-### Print the user counts for each view for a given site
+### Print today's visitors for a given site by each view
 
 ```juttle
-read ga -webProperty 'www.mysite.io'
+read ga -from :today: -to :now: -webProperty 'www.jut.io'
 | reduce users=sum(users) by view, viewId
 ```
 
@@ -131,13 +131,12 @@ The `options` can include the following:
 
 Name   | Type   | Description
 -------|--------|-------------
-`from` | moment | select points after this time (inclusive); default is today
-`to`   | moment | select points before this time (inclusive); default is today
-`last` | duration | shorthand for `-from :now: - <duration> -to :now:`
+`from` | moment | select points after this time (inclusive); default is 2 weeks ago
+`to`   | moment | select points before this time (exclusive); default is the start of today
 `viewId` | string | read data from only the given view (aka profile)
 `webProperty` | string | read data from only the given property (specified either by name or id)
 
-The options `from`, `to`, and `last` control the time period for the query. The API only supports querying for full days, so the values supplied to these options are rounded to a whole day.
+The options `from` and `to` control the time period for the query. The API only supports querying by whole day, so the values supplied to these options must be aligned to the start of a given day.
 
 The other options are used to control which property or view is queried.
 

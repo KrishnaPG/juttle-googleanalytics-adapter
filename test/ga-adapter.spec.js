@@ -74,7 +74,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric from one view', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} -last :week: | reduce sum(users)`
+                program: `read ga -viewId ${viewId} | reduce sum(users)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -85,7 +85,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric from one property', () => {
             return checkJuttle({
-                program: `read ga -webProperty "${views[0].webProperty}" -last :week: | reduce sum(users)`
+                program: `read ga -webProperty "${views[0].webProperty}" | reduce sum(users)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -96,7 +96,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric into a variable', () => {
             return checkJuttle({
-                program: `const x="foo"; read ga -viewId ${viewId} -last :week: | reduce *x=sum(users)`
+                program: `const x="foo"; read ga -viewId ${viewId} | reduce *x=sum(users)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -107,7 +107,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric into a * field', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} -last :week: | reduce *"foo"=sum(users)`
+                program: `read ga -viewId ${viewId} | reduce *"foo"=sum(users)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -118,7 +118,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric by a dimension', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} -last :week: | reduce sum(users) by userType`
+                program: `read ga -viewId ${viewId} | reduce sum(users) by userType`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -131,7 +131,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric across views', () => {
             return checkJuttle({
-                program: 'read ga -last :week: | reduce sum(users) by webProperty, view'
+                program: 'read ga | reduce sum(users) by webProperty, view'
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -142,7 +142,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a single metric across properties', () => {
             return checkJuttle({
-                program: 'read ga -last :week: | reduce sum(users) by webProperty'
+                program: 'read ga | reduce sum(users) by webProperty'
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -153,7 +153,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can reduce a second time', () => {
             return checkJuttle({
-                program: 'read ga -last :week: | reduce sum(users) by webProperty, view | reduce count()'
+                program: 'read ga | reduce sum(users) by webProperty, view | reduce count()'
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -164,7 +164,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a time metric', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} -last :week: | reduce sum(avgTimeOnSite)`
+                program: `read ga -viewId ${viewId} | reduce sum(avgTimeOnSite)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -175,7 +175,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it('can query a metric with no data', () => {
             return checkJuttle({
-                program: `read ga -viewId ${viewId} | reduce sum(transactions)`
+                program: `read ga -viewId ${viewId} -from :today: -to :now: | reduce sum(adxCoverage)`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -206,7 +206,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
             it(`can reduce -every ${interval}`, () => {
                 return checkJuttle({
-                    program: `read ga -viewId ${viewId} -last :day: | reduce -every ${interval} sum(users)`
+                    program: `read ga -viewId ${viewId} | reduce -every ${interval} sum(users)`
                 })
                 .then((results) => {
                     expect(results.errors).deep.equal([]);
@@ -218,7 +218,7 @@ juttle_test_utils.withAdapterAPI(function() {
 
         it(`can reduce -every interval across multiple properties`, () => {
             return checkJuttle({
-                program: `read ga -last :week: | reduce -every :day: sum(users) by webProperty`
+                program: `read ga | reduce -every :day: sum(users) by webProperty`
             })
             .then((results) => {
                 expect(results.errors).deep.equal([]);
@@ -340,6 +340,20 @@ juttle_test_utils.withAdapterAPI(function() {
             return badJuttle(
                 `read ga -viewId ${viewId}| reduce by viewId`,
                 'read ga does not support -viewId with reduce group by viewId'
+            );
+        });
+
+        it('fails with -from a time that is not a whole day', () => {
+            return badJuttle(
+                `read ga -viewId ${viewId} -from :today: + :1h: | reduce sum(users)`,
+                'Unsupported value for -from option: must be aligned to a whole day'
+            );
+        });
+
+        it('fails with -to a time that is not a whole day', () => {
+            return badJuttle(
+                `read ga -viewId ${viewId} -to :today: + :1h: | reduce sum(users)`,
+                'Unsupported value for -to option: must be aligned to a whole day or :now:'
             );
         });
 
